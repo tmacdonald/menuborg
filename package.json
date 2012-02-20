@@ -4,6 +4,6 @@
   , "private": true
   , "dependencies": {
       "express": "2.5.8"
-    , "stache": "0.1.0"
+    , "ejs": "0.6.1"
   }
 }
