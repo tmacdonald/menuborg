@@ -1,173 +1,271 @@
-(function($){
-  var Recipe = Backbone.Model.extend({
-    defaults: {
-      name: "",
-      servings: 0,
-      ingredients: []
+(function() {
+  var AddView, AppRouter, DetailsView, EditView, ItemView, ListView, Recipe, Recipes, app,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Recipe = (function(_super) {
+
+    __extends(Recipe, _super);
+
+    function Recipe() {
+      Recipe.__super__.constructor.apply(this, arguments);
     }
-  });
 
-  var Recipes = Backbone.Collection.extend({
-    model: Recipe,
-    localStorage: new Store("recipes")
-  });
+    Recipe.prototype.initialize = function() {
+      return {
+        defaults: {
+          name: "",
+          servings: 0,
+          ingredients: []
+        }
+      };
+    };
 
-  var RecipeView = Backbone.View.extend({
-    tagName: 'tr',
+    return Recipe;
 
-    events: {
-    },
+  })(Backbone.Model);
 
-    initialize: function(){
-      _.bindAll(this, 'render');
-    },
+  Recipes = (function(_super) {
 
-    render: function(){
-      var template = $('#recipeTemplate').html();
-      $(this.el).html(Mustache.render(template, this.model.toJSON()));
+    __extends(Recipes, _super);
+
+    function Recipes() {
+      Recipes.__super__.constructor.apply(this, arguments);
+    }
+
+    Recipes.prototype.model = Recipe;
+
+    Recipes.prototype.localStorage = new Store("recipes");
+
+    return Recipes;
+
+  })(Backbone.Collection);
+
+  ItemView = (function(_super) {
+
+    __extends(ItemView, _super);
+
+    function ItemView() {
+      ItemView.__super__.constructor.apply(this, arguments);
+    }
+
+    ItemView.prototype.tagName = 'tr';
+
+    ItemView.prototype.initialize = function() {
+      return this.template = $('#itemTemplate').html();
+    };
+
+    ItemView.prototype.render = function() {
+      $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
       return this;
+    };
+
+    return ItemView;
+
+  })(Backbone.View);
+
+  AddView = (function(_super) {
+
+    __extends(AddView, _super);
+
+    function AddView() {
+      this.render = __bind(this.render, this);
+      this.save = __bind(this.save, this);
+      AddView.__super__.constructor.apply(this, arguments);
     }
-  });
 
-  var AddRecipeView = Backbone.View.extend({
-    tagName: "div",
-
-    template: $('#formTemplate').html(),
-
-    events: {
+    AddView.prototype.events = {
       "submit form": "save"
-    },
+    };
 
-    initialize: function(){
-      _.bindAll(this, 'save', 'render');
-    },
+    AddView.prototype.initialize = function() {
+      return this.template = $('#formTemplate').html();
+    };
 
-    save: function(e){
+    AddView.prototype.save = function(e) {
+      var ingredients;
       e.preventDefault();
-
-      var ingredients = $('#ingredients', this.el).val().split("\n");
-      ingredients = _.filter(ingredients, function(ingredient) { return ingredient; });
-
-      app.recipes.create({
-        name: $("#name", this.el).val(),
-        servings: $("#servings", this.el).val(),
+      ingredients = $('#ingredients', this.el).val().split("\n");
+      ingredients = _.filter(ingredients, function(ingredient) {
+        return ingredient;
+      });
+      return app.recipes.create({
+        name: $('#name', this.el).val(),
+        servings: $('#servings', this.el).val(),
         ingredients: ingredients
       }, {
-        success: function(){
-          Backbone.history.navigate('', true);
+        success: function() {
+          return Backbone.history.navigate('', true);
         }
       });
+    };
 
-    },
-
-    render: function(e){
+    AddView.prototype.render = function(e) {
       $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
       return this;
+    };
+
+    return AddView;
+
+  })(Backbone.View);
+
+  EditView = (function(_super) {
+
+    __extends(EditView, _super);
+
+    function EditView() {
+      this.render = __bind(this.render, this);
+      this.save = __bind(this.save, this);
+      EditView.__super__.constructor.apply(this, arguments);
     }
-  });
 
-  var EditView = Backbone.View.extend({
-    template: $('#formTemplate').html(),
+    EditView.prototype.initialize = function() {
+      return this.template = $('#formTemplate').html();
+    };
 
-    events: {
+    EditView.prototype.events = {
       "submit form": "save"
-    },
+    };
 
-    initialize: function(){
-      _.bindAll(this, 'save', 'render');
-    },
-
-    save: function(e){
+    EditView.prototype.save = function(e) {
+      var ingredients;
       e.preventDefault();
-
-      var ingredients = $('#ingredients', this.el).val().split("\n");
-      ingredients = _.filter(ingredients, function(ingredient) { return ingredient; });
-      this.model.save({
-        name: $("#name", this.el).val(),
-        servings: $("#servings", this.el).val(),
+      ingredients = $('#ingredient', this.el).val().split("\n");
+      ingredients = _.filter(ingredients, function(ingredient) {
+        return ingredient;
+      });
+      return this.model.save({
+        name: $('#name', this.el).val(),
+        servings: $('#servings', this.el).val(),
         ingredients: ingredients
-      },
-      {
-        success: function(){
-          Backbone.history.navigate('', true);
+      }, {
+        success: function() {
+          return Backbone.history.navigate('', true);
         }
       });
-    },
+    };
 
-    render: function(e){
+    EditView.prototype.render = function() {
       $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
       return this;
+    };
+
+    return EditView;
+
+  })(Backbone.View);
+
+  DetailsView = (function(_super) {
+
+    __extends(DetailsView, _super);
+
+    function DetailsView() {
+      this.render = __bind(this.render, this);
+      DetailsView.__super__.constructor.apply(this, arguments);
     }
-  });
 
-  var DetailsView = Backbone.View.extend({
-    tagName: "div",
+    DetailsView.prototype.initialize = function() {
+      return this.template = $('#viewTemplate').html();
+    };
 
-    template: $('#viewRecipeTemplate').html(),
-
-    render: function(e){
-      var data = this.model.toJSON();
+    DetailsView.prototype.render = function(e) {
       $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
       return this;
+    };
+
+    return DetailsView;
+
+  })(Backbone.View);
+
+  ListView = (function(_super) {
+
+    __extends(ListView, _super);
+
+    function ListView() {
+      this.render = __bind(this.render, this);
+      this.addAll = __bind(this.addAll, this);
+      ListView.__super__.constructor.apply(this, arguments);
     }
-  });
 
-  var RecipesView = Backbone.View.extend({
-    tagName: 'div',
+    ListView.prototype.initialize = function() {
+      this.template = $('#listTemplate').html();
+      return this.model.bind('reset', this.addAll);
+    };
 
-    template: $('#recipeListTemplate').html(),
+    ListView.prototype.addAll = function(eventName) {
+      return _.each(this.model.models, function(recipe) {
+        var recipeView;
+        recipeView = new ItemView({
+          model: recipe
+        });
+        return $('#recipes', this.el).append(recipeView.render().el);
+      });
+    };
 
-    initialize: function(){
-      this.model.bind("reset", this.addAll, this);
-    },
-
-    addAll: function(eventName){
-      _.each(this.model.models, function(recipe){
-        $('#recipes', this.el).append(new RecipeView({model: recipe}).render().el);
-      }, this);
-    },
-
-    render: function(eventName){
-      $(this.el).html(Mustache.render(this.template, {}));
+    ListView.prototype.render = function() {
+      $(this.el).html(Mustache.render(this.template));
       return this;
-    }
-  });
+    };
 
-  var AppRouter = Backbone.Router.extend({
-    routes: {
+    return ListView;
+
+  })(Backbone.View);
+
+  AppRouter = (function(_super) {
+
+    __extends(AppRouter, _super);
+
+    function AppRouter() {
+      AppRouter.__super__.constructor.apply(this, arguments);
+    }
+
+    AppRouter.prototype.routes = {
       "": "list",
       "new": "newForm",
       ":id": "view",
-      ":id/edit": "edit",
-    },
+      ":id/edit": "edit"
+    };
 
-    initialize: function(){
-    },
-
-    list: function(){
+    AppRouter.prototype.list = function() {
+      var recipesView;
       this.recipes = new Recipes();
-      this.recipesView = new RecipesView({model: this.recipes});
-      $('#content').html(this.recipesView.render().el);
-      this.recipes.fetch();
-    },
+      recipesView = new ListView({
+        model: this.recipes
+      });
+      $('#content').html(recipesView.render().el);
+      return this.recipes.fetch();
+    };
 
-    newForm: function(){
-      this.addRecipeView = new AddRecipeView({model: new Recipe()});
-      $('#content').html(this.addRecipeView.render().el);
-    },
+    AppRouter.prototype.view = function(id) {
+      var detailsView;
+      detailsView = new DetailsView({
+        model: this.recipes.get(id)
+      });
+      return $('#content').html(detailsView.render().el);
+    };
 
-    view: function(id){
-      this.recipeDetailsView = new DetailsView({model: this.recipes.get(id)});
-      $('#content').html(this.recipeDetailsView.render().el);
-    },
+    AppRouter.prototype.newForm = function() {
+      var addView;
+      addView = new AddView({
+        model: new Recipe()
+      });
+      return $('#content').html(addView.render().el);
+    };
 
-    edit: function(id){
-      this.editView = new EditView({model: this.recipes.get(id)});
-      $('#content').html(this.editView.render().el);
-    },
-  });
+    AppRouter.prototype.edit = function(id) {
+      var editView;
+      editView = new EditView({
+        model: this.recipes.get(id)
+      });
+      return $('#content').html(editView.render().el);
+    };
 
-  var app = new AppRouter();
+    return AppRouter;
+
+  })(Backbone.Router);
+
+  app = new AppRouter();
+
   Backbone.history.start();
 
-})(jQuery);
+}).call(this);
