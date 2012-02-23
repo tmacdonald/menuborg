@@ -45,16 +45,53 @@
     save: function(e){
       e.preventDefault();
 
+      var ingredients = $('#ingredients', this.el).val().split("\n");
+      ingredients = _.filter(ingredients, function(ingredient) { return ingredient; });
+
       app.recipes.create({
         name: $("#name", this.el).val(),
         servings: $("#servings", this.el).val(),
-        ingredients: $("#ingredients", this.el).val().split("\n")
+        ingredients: ingredients
       }, {
         success: function(){
           Backbone.history.navigate('', true);
         }
       });
 
+    },
+
+    render: function(e){
+      $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
+      return this;
+    }
+  });
+
+  var EditView = Backbone.View.extend({
+    template: $('#formTemplate').html(),
+
+    events: {
+      "submit form": "save"
+    },
+
+    initialize: function(){
+      _.bindAll(this, 'save', 'render');
+    },
+
+    save: function(e){
+      e.preventDefault();
+
+      var ingredients = $('#ingredients', this.el).val().split("\n");
+      ingredients = _.filter(ingredients, function(ingredient) { return ingredient; });
+      this.model.save({
+        name: $("#name", this.el).val(),
+        servings: $("#servings", this.el).val(),
+        ingredients: ingredients
+      },
+      {
+        success: function(){
+          Backbone.history.navigate('', true);
+        }
+      });
     },
 
     render: function(e){
@@ -100,7 +137,8 @@
     routes: {
       "": "list",
       "new": "newForm",
-      ":id": "view"
+      ":id": "view",
+      ":id/edit": "edit",
     },
 
     initialize: function(){
@@ -121,7 +159,12 @@
     view: function(id){
       this.recipeDetailsView = new DetailsView({model: this.recipes.get(id)});
       $('#content').html(this.recipeDetailsView.render().el);
-    }
+    },
+
+    edit: function(id){
+      this.editView = new EditView({model: this.recipes.get(id)});
+      $('#content').html(this.editView.render().el);
+    },
   });
 
   var app = new AppRouter();

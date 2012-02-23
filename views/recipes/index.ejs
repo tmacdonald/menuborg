@@ -29,10 +29,9 @@
       <label class="control-label" for="ingredients">Ingredients</label>
       <div class="controls">
         <textarea class="input-xlarge" id="ingredients">
-          {{#ingredients}}
-            {{.}}
-          {{/ingredients}}
-        </textarea>
+{{#ingredients}}
+{{.}}
+{{/ingredients}}</textarea>
       </div>
     </p>
     <div class="form-actions">
@@ -43,6 +42,7 @@
 </script>
 
 <script type="text/template" id="viewRecipeTemplate">
+  <a href="#{{id}}/edit" class="btn">Edit</a>
   <h2>{{name}}</h2>
   <span class="servings">{{servings}} servings</span>
   <ul class="ingredients">
