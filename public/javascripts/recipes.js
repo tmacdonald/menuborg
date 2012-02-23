@@ -1,5 +1,10 @@
 (function($){
   var Recipe = Backbone.Model.extend({
+    defaults: {
+      name: "",
+      servings: 0,
+      ingredients: []
+    }
   });
 
   var Recipes = Backbone.Collection.extend({
@@ -24,85 +29,102 @@
     }
   });
 
-  var recipes = new Recipes();
-
   var AddRecipeView = Backbone.View.extend({
-    el: "#addRecipe",
+    tagName: "div",
+
+    template: $('#formTemplate').html(),
 
     events: {
-      "submit form": "saveRecipe"
+      "submit form": "save"
     },
 
     initialize: function(){
-      _.bindAll(this, 'saveRecipe', 'show', 'hide');
+      _.bindAll(this, 'save', 'render');
     },
 
-    saveRecipe: function(e){
+    save: function(e){
       e.preventDefault();
 
-      recipes.create({
+      app.recipes.create({
         name: $("#name", this.el).val(),
         servings: $("#servings", this.el).val(),
         ingredients: $("#ingredients", this.el).val().split("\n")
+      }, {
+        success: function(){
+          Backbone.history.navigate('', true);
+        }
       });
-      this.hide();
+
     },
 
-    show: function(e){
-      $(this.el).removeClass('hide');
-    },
+    render: function(e){
+      $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
+      return this;
+    }
+  });
 
-    hide: function(e){
-      $(this.el).addClass('hide');
+  var DetailsView = Backbone.View.extend({
+    tagName: "div",
+
+    template: $('#viewRecipeTemplate').html(),
+
+    render: function(e){
+      var data = this.model.toJSON();
+      $(this.el).html(Mustache.render(this.template, this.model.toJSON()));
+      return this;
     }
   });
 
   var RecipesView = Backbone.View.extend({
-    el: "#recipes",
+    tagName: 'div',
 
-    events: {
-    },
+    template: $('#recipeListTemplate').html(),
 
     initialize: function(){
-      _.bindAll(this, 'render', 'appendItem');
-
-      recipes.bind('add', this.appendItem);
-      recipes.bind('reset', this.addAll, this);
+      this.model.bind("reset", this.addAll, this);
     },
 
-    addAll: function(){
-      recipes.each(this.appendItem);
+    addAll: function(eventName){
+      _.each(this.model.models, function(recipe){
+        $('#recipes', this.el).append(new RecipeView({model: recipe}).render().el);
+      }, this);
     },
 
-    appendItem: function(recipe){
-      var recipeView = new RecipeView({
-        model: recipe
-      });
-      $(this.el).append(recipeView.render().el);
+    render: function(eventName){
+      $(this.el).html(Mustache.render(this.template, {}));
+      return this;
     }
   });
 
-  var AppView = Backbone.View.extend({
-    el: "#app",
-
-    events: {
-      "click button#add": "add"
+  var AppRouter = Backbone.Router.extend({
+    routes: {
+      "": "list",
+      "new": "newForm",
+      ":id": "view"
     },
 
     initialize: function(){
-      _.bindAll(this, 'add');
-
-      this.recipesView = new RecipesView();
-      this.addRecipeView = new AddRecipeView();
-
-      recipes.fetch();
     },
 
-    add: function(){
-      this.addRecipeView.show();
+    list: function(){
+      this.recipes = new Recipes();
+      this.recipesView = new RecipesView({model: this.recipes});
+      $('#content').html(this.recipesView.render().el);
+      this.recipes.fetch();
+    },
+
+    newForm: function(){
+      this.addRecipeView = new AddRecipeView({model: new Recipe()});
+      $('#content').html(this.addRecipeView.render().el);
+    },
+
+    view: function(id){
+      this.recipeDetailsView = new DetailsView({model: this.recipes.get(id)});
+      $('#content').html(this.recipeDetailsView.render().el);
     }
   });
 
-  var app = new AppView();
+  var app = new AppRouter();
+  Backbone.history.start();
 
 })(jQuery);

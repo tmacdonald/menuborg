@@ -1,37 +1,53 @@
-<h1><%= title %></h1>
-
 <div id="app">
-  <table class="table table-striped" id="recipes"></table>
-
-  <button id="add">Add</button>
-
-  <div id="addRecipe" class="hide">
-    <form>
-      <div class="control-group">
-        <label class="control-label" for="name">Name</label>
-        <div class="controls">
-          <input type="text" class="input-xlarge" id="name" placeholder="Recipe name" />
-        </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label" for="servings">Servings</label>
-        <div class="controls">
-          <input type="text" class="input-small" id="servings" placeholder="4" />
-        </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label" for="ingredients">Ingredients</label>
-        <div class="controls">
-          <textarea class="input-xlarge" id="ingredients"></textarea>
-        </div>
-      </p>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save changes</button>
-        <button class="btn">Cancel</button>
-      </div>
-    </form>
-  </div>
+  <div id="content"></div>
+</div>
 
 <script type="text/template" id="recipeTemplate">
-  <td>{{name}}</td><td>{{servings}}</td>
+  <td><a href="#{{id}}">{{name}}</a></td><td>{{servings}}</td>
+</script>
+
+<script type="text/template" id="recipeListTemplate">
+  <table id="recipes" class="table table-striped"></table>
+  <a href="#new" class="btn">Add</a>
+</script>
+
+<script type="text/template" id="formTemplate">
+  <form>
+    <div class="control-group">
+      <label class="control-label" for="name">Name</label>
+      <div class="controls">
+        <input type="text" class="input-xlarge" id="name" value="{{name}}" />
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="servings">Servings</label>
+      <div class="controls">
+        <input type="text" class="input-small" id="servings" value="{{servings}}"/>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="ingredients">Ingredients</label>
+      <div class="controls">
+        <textarea class="input-xlarge" id="ingredients">
+          {{#ingredients}}
+            {{.}}
+          {{/ingredients}}
+        </textarea>
+      </div>
+    </p>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save changes</button>
+      <a href="#" class="btn">Cancel</a>
+    </div>
+  </form>
+</script>
+
+<script type="text/template" id="viewRecipeTemplate">
+  <h2>{{name}}</h2>
+  <span class="servings">{{servings}} servings</span>
+  <ul class="ingredients">
+  {{#ingredients}}
+    <li>{{.}}</li>
+  {{/ingredients}}
+  </ul>
 </script>
