@@ -1,5 +1,5 @@
 (function() {
-  var AddView, AppRouter, DetailsView, EditView, ItemView, ListView, Recipe, Recipes, app,
+  var AddView, AppRouter, DetailsView, EditView, ItemView, ListView, Recipe, Recipes, recipes,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -90,7 +90,7 @@
       ingredients = _.filter(ingredients, function(ingredient) {
         return ingredient;
       });
-      return app.recipes.create({
+      return recipes.create({
         name: $('#name', this.el).val(),
         servings: $('#servings', this.el).val(),
         ingredients: ingredients
@@ -131,7 +131,7 @@
     EditView.prototype.save = function(e) {
       var ingredients;
       e.preventDefault();
-      ingredients = $('#ingredient', this.el).val().split("\n");
+      ingredients = $('#ingredients', this.el).val().split("\n");
       ingredients = _.filter(ingredients, function(ingredient) {
         return ingredient;
       });
@@ -193,6 +193,7 @@
     };
 
     ListView.prototype.addAll = function(eventName) {
+      $('#recipes', this.el).html("");
       return _.each(this.model.models, function(recipe) {
         var recipeView;
         recipeView = new ItemView({
@@ -228,18 +229,17 @@
 
     AppRouter.prototype.list = function() {
       var recipesView;
-      this.recipes = new Recipes();
       recipesView = new ListView({
-        model: this.recipes
+        model: recipes
       });
       $('#content').html(recipesView.render().el);
-      return this.recipes.fetch();
+      return recipes.fetch();
     };
 
     AppRouter.prototype.view = function(id) {
       var detailsView;
       detailsView = new DetailsView({
-        model: this.recipes.get(id)
+        model: recipes.get(id)
       });
       return $('#content').html(detailsView.render().el);
     };
@@ -255,7 +255,7 @@
     AppRouter.prototype.edit = function(id) {
       var editView;
       editView = new EditView({
-        model: this.recipes.get(id)
+        model: recipes.get(id)
       });
       return $('#content').html(editView.render().el);
     };
@@ -264,8 +264,14 @@
 
   })(Backbone.Router);
 
-  app = new AppRouter();
+  recipes = new Recipes();
 
-  Backbone.history.start();
+  recipes.fetch({
+    success: function() {
+      var app;
+      app = new AppRouter();
+      return Backbone.history.start();
+    }
+  });
 
 }).call(this);

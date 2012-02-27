@@ -30,7 +30,7 @@ class AddView extends Backbone.View
     e.preventDefault()
     ingredients = $('#ingredients', @el).val().split "\n"
     ingredients = _.filter ingredients, (ingredient) -> ingredient
-    app.recipes.create {
+    recipes.create {
       name: $('#name', @el).val()
       servings: $('#servings', @el).val()
       ingredients: ingredients
@@ -53,7 +53,7 @@ class EditView extends Backbone.View
   save: (e) =>
     e.preventDefault()
 
-    ingredients = $('#ingredient', @el).val().split "\n"
+    ingredients = $('#ingredients', @el).val().split "\n"
     ingredients = _.filter ingredients, (ingredient) -> ingredient
 
     @model.save {
@@ -83,6 +83,7 @@ class ListView extends Backbone.View
     @model.bind 'reset', @addAll
   
   addAll: (eventName) =>
+    $('#recipes', @el).html ""
     _.each @model.models, (recipe) ->
       recipeView = new ItemView
         model: recipe
@@ -100,15 +101,14 @@ class AppRouter extends Backbone.Router
     ":id/edit": "edit"
 
   list: ->
-    @recipes = new Recipes()
     recipesView = new ListView
-      model: @recipes
+      model: recipes
     $('#content').html recipesView.render().el
-    @recipes.fetch()
+    recipes.fetch()
 
   view: (id) ->
     detailsView = new DetailsView
-      model: @recipes.get id
+      model: recipes.get id
     $('#content').html detailsView.render().el
 
   newForm: ->
@@ -118,8 +118,11 @@ class AppRouter extends Backbone.Router
 
   edit: (id) ->
     editView = new EditView
-      model: @recipes.get id
+      model: recipes.get id
     $('#content').html editView.render().el
 
-app = new AppRouter()
-Backbone.history.start()
+recipes = new Recipes()
+recipes.fetch
+  success: () ->
+    app = new AppRouter()
+    Backbone.history.start()
